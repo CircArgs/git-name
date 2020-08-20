@@ -68,7 +68,7 @@ class NameGenerator:
         ]
 
         self.mapper = OrderedDict()
-        with open("mapper.csv", newline="") as csvfile:
+        with open(os.path.join(self.local,"mapper.csv"), newline="") as csvfile:
             mapreader = csv.reader(csvfile, delimiter=",")
             for row in mapreader:
                 self.mapper[row[0]] = [int(i) * self.counts[row[0]] for i in row[1:]]
@@ -116,8 +116,11 @@ class NameGenerator:
         lower hash => more concise "name" so lower n => more concise "name"
         """
         hash = hash[:n]
-        num = int(hash, 16)
-        
+        try:
+            num = int(hash, 16)
+        except ValueError:
+            raise ValueError("Argument of `{}` could not not be understood as a hash.".format(hash))
+
         if num<0:
             raise ValueError("Hash cannot be negative.")
             
