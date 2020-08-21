@@ -1,6 +1,5 @@
 import os
 import csv
-from hashlib import sha1
 from string import ascii_letters
 from collections import OrderedDict
 from itertools import compress
@@ -233,4 +232,5 @@ class NameGenerator:
     
     def generate_hash_from_name(self, name: str, n:int=4)->str:
         num=self.generate_num(name)
-        return hex(num)[2:][:n]
+        ret = hex(num)[2:][:n]
+        return ret.zfill(n-len(ret))
