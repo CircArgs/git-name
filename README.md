@@ -36,6 +36,12 @@ ten occupied nuts
 
 CircArgs $ git name -f "ten occupied nuts"
 efa8f31
+
+CircArgs $ git name -f "five fat frogs"
+a42cd68
+
+# use names with git instead of hashes
+CircArgs $ git checkout $(git name -f "five fat frogs")
 ```
 
 ## python
@@ -58,5 +64,12 @@ print(name_num)
 
 print(num==name_num)
 #True
+
+print(ng.generate_hash_from_name(name, 7))
+#8791375
+
+print(ng.generate_name_from_hash(8791375, 7)
+#'eight upward buttons'
+
 
 ```
