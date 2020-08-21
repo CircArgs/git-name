@@ -32,6 +32,6 @@ optional arguments:
 CircArgs $ git name efa8f31
 ten occupied nuts
 
-CircArgs $ git name "ten occupied nuts"
+CircArgs $ git name -f "ten occupied nuts"
 efa8f31
 ```
