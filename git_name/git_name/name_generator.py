@@ -1,5 +1,6 @@
 import os
 import csv
+from hashlib import sha1
 from string import ascii_letters
 from collections import OrderedDict
 from itertools import compress
@@ -76,7 +77,7 @@ class NameGenerator:
         self.word_order = list(self.mapper.keys())
         self.poss_combos=[[vv>0 for vv in v] for v in self.mapper.values()]
 
-        self.poss_combos={tuple(compress(self.word_order, [l[i] for l in self.poss_combos])) for i in range(len(self.poss_combos[0]))}
+        self.poss_combos=[tuple(compress(self.word_order, [l[i] for l in self.poss_combos])) for i in range(len(self.poss_combos[0]))]
         
         self.tot = []
         for v in self.mapper.values():
@@ -110,24 +111,27 @@ class NameGenerator:
         
         return word
     
-    def generate_name(self, hash: str, n:int=4):
+    def generate_name_from_hash(self, hash, n:int=4)->str:
+        hash = hash[:n]
+        try:
+            num = int("0x"+hash, 16)
+        except ValueError:
+            raise ValueError("Argument of `{}` could not not be understood as a hash.".format(hash))
+        return self.generate_name(num)
+    
+    def generate_name(self, num: int)->str:
         """
         given a hash, return an english "sentence"/"name" based on the first n digits of the hash
         lower hash => more concise "name" so lower n => more concise "name"
         """
-        hash = hash[:n]
-        try:
-            num = int(hash, 16)
-        except ValueError:
-            raise ValueError("Argument of `{}` could not not be understood as a hash.".format(hash))
-
+        
         if num<0:
             raise ValueError("Hash cannot be negative.")
             
         if num >= self.tot[-1]:
             raise OverflowError("Unfortunately, this hash {} (hex) = {} (decimal) is larger than our corpus can handle {} (hex) = {} (decimal). You requested the first {} digits be used. Try less.".format(hash, num,  hex(sum(self.tot)), sum(self.tot), n))
 
-        choices = OrderedDict()
+        choices = {}
         for i, t in enumerate(self.tot):
             if num<t:
                 i-=1
@@ -157,7 +161,7 @@ class NameGenerator:
         except ValueError:
             return False
         
-    def generate_hash(self, name: str, n:int=4):
+    def generate_num(self, name: str)->int:
         
         name=" ".join(name.split())
         orig=name
@@ -223,7 +227,10 @@ class NameGenerator:
         for words in rel_counts_ordered:
             remainder, token = assignments[words]
             dividend = self.counts[words] * dividend + remainder
-        for j, i in enumerate(self.tot):
-            if dividend>i:
-                dividend+=i
+        dividend+=self.tot[self.poss_combos.index(tuple(assignments.keys()))]
+
         return dividend
+    
+    def generate_hash_from_name(self, name: str, n:int=4)->str:
+        num=self.generate_num(name)
+        return hex(num)[2:][:n]
